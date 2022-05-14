@@ -52,3 +52,29 @@ pub fn to_hex_str(bytes: &[u8]) -> String {
     })
     .collect()
 }
+
+// source: https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html
+pub fn frequency_score(b: &u8) -> u64 {
+  match (*b as char).to_ascii_uppercase() {
+    ' ' => 20000,
+    'E' => 12000,
+    'T' => 9000,
+    'A'|'I'|'N'|'O'|'S' => 8000,
+    'H' => 6400,
+    'R' => 6200,
+    'D' => 4400,
+    'L' => 4000,
+    'U' => 3400,
+    'C'|'M' => 3000,
+    'F' => 2500,
+    'W'|'Y' => 2000,
+    'G'|'P' => 1700,
+    'B' => 1600,
+    'V' => 1200,
+    'K' => 800,
+    'Q' => 500,
+    'J'|'X' => 400,
+    'Z' => 200,
+    _ => 0
+  }
+}
