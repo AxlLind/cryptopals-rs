@@ -122,3 +122,14 @@ pub fn aes_ecb_decrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
 pub fn aes_ecb_encrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
   aes_ecb(block, key, Mode::Encrypt)
 }
+
+pub fn rand_range(min: u64, max: u64) -> u64 {
+  let range = max - min;
+  let mut r = range+1;
+  while r > range {
+    let mut bytes = [0u8;8];
+    openssl::rand::rand_bytes(&mut bytes).unwrap();
+    r = u64::from_be_bytes(bytes) % range.next_power_of_two();
+  }
+  r + min
+}
