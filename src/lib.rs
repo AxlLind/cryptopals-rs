@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use openssl::symm::{Cipher, Mode, Crypter};
 
 const B64_ENCODE_TBL: [u8; 64] = *b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const B64_DECODE_TBL: [u8; 256] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0, 0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -102,4 +103,22 @@ pub fn frequency_score(b: u8) -> u64 {
     'Z' => 200,
     _ => 0
   }
+}
+
+fn aes_ecb(block: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
+  assert_eq!(block.len() % 16, 0);
+  let mut encrypter = Crypter::new(Cipher::aes_128_cbc(), mode, key, None).unwrap();
+  encrypter.pad(false);
+  let mut out = vec![0;block.len()+16];
+  encrypter.update(&block, &mut out).unwrap();
+  out.truncate(block.len());
+  out
+}
+
+pub fn aes_ecb_decrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
+  aes_ecb(block, key, Mode::Decrypt)
+}
+
+pub fn aes_ecb_encrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
+  aes_ecb(block, key, Mode::Encrypt)
 }
