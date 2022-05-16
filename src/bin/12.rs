@@ -17,8 +17,11 @@ impl Oracle {
   }
 
   fn encrypt(&self, bytes: &[u8]) -> Vec<u8> {
-    let mut tmp = bytes.iter().copied().chain(self.target.iter().copied()).chain([0;16]).collect::<Vec<_>>();
-    while tmp.len() % 16 != 0 { tmp.push(0) }
+    let tmp = bytes.iter()
+      .chain(self.target.iter())
+      .chain(&[0;16])
+      .copied()
+      .collect::<Vec<_>>();
     encrypt(Cipher::aes_128_ecb(), &self.key, None, &tmp).unwrap()
   }
 }
@@ -43,21 +46,20 @@ fn find_blocksize(oracle: &Oracle) -> usize {
 fn decrypt_byte(oracle: &Oracle, known_text: &[u8]) -> u8 {
   // we need to pad the message such that the
   // target byte ends up at the end of a block
-  let padding = 15 - (known_text.len() % 16);
-  let mut msg = vec![0; padding];
+  let mut msg = vec![0; 15 - known_text.len() % 16];
   let expectedtext = oracle.encrypt(&msg);
 
   // extend the padding with the decrypted plaintext
   // and push a spot for the guess byte
   msg.extend(known_text);
   msg.push(0);
-  let last_index = msg.len() - 1;
+  let n = msg.len() - 1;
   (0u8..=0xff).find(|&b| {
     // guess that the byte is `b`
     // check if the ciphertext is the expected one
-    msg[last_index] = b;
+    msg[n] = b;
     let ciphertext = oracle.encrypt(&msg);
-    ciphertext[last_index-15..=last_index] == expectedtext[last_index-15..=last_index]
+    ciphertext[n-15..=n] == expectedtext[n-15..=n]
   }).unwrap()
 }
 
