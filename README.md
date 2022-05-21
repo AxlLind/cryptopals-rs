@@ -19,7 +19,7 @@ This repo is a work in progress. Challenges solved so far:
   - [x] Challenge 13
   - [x] Challenge 14
   - [x] Challenge 15
-  - [ ] Challenge 16
+  - [x] Challenge 16
 - [ ] Set 3
 - [ ] Set 4
 - [ ] Set 5

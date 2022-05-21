@@ -123,9 +123,9 @@ pub fn pkcs_depad(bytes: &mut Vec<u8>) -> bool {
   true
 }
 
-fn aes_ecb(block: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
+fn aes(block: &[u8], key: &[u8], cipher: Cipher, mode: Mode) -> Vec<u8> {
   assert_eq!(block.len() % 16, 0);
-  let mut encrypter = Crypter::new(Cipher::aes_128_ecb(), mode, key, None).unwrap();
+  let mut encrypter = Crypter::new(cipher, mode, key, None).unwrap();
   encrypter.pad(false);
   let mut out = vec![0;block.len()+16];
   encrypter.update(&block, &mut out).unwrap();
@@ -134,11 +134,20 @@ fn aes_ecb(block: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
 }
 
 pub fn aes_ecb_decrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
-  aes_ecb(block, key, Mode::Decrypt)
+  aes(block, key, Cipher::aes_128_ecb(), Mode::Decrypt)
 }
 
 pub fn aes_ecb_encrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
-  aes_ecb(block, key, Mode::Encrypt)
+  aes(block, key, Cipher::aes_128_ecb(), Mode::Encrypt)
+}
+
+pub fn aes_cbc_decrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
+  aes(block, key, Cipher::aes_128_cbc(), Mode::Decrypt)
+
+}
+
+pub fn aes_cbc_encrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
+  aes(block, key, Cipher::aes_128_cbc(), Mode::Encrypt)
 }
 
 pub fn rand_range(min: u64, max: u64) -> u64 {
