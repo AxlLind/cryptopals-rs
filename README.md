@@ -16,7 +16,7 @@ This repo is a work in progress. Challenges solved so far:
   - [x] Challenge 10
   - [x] Challenge 11
   - [x] Challenge 12
-  - [ ] Challenge 13
+  - [x] Challenge 13
   - [ ] Challenge 14
   - [ ] Challenge 15
   - [ ] Challenge 16

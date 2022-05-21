@@ -1,3 +1,4 @@
+use std::iter;
 use itertools::Itertools;
 use openssl::symm::{Cipher, Mode, Crypter};
 
@@ -105,9 +106,26 @@ pub fn frequency_score(b: u8) -> u64 {
   }
 }
 
+pub fn pkcs_pad(bytes: &mut Vec<u8>) {
+  let pad_len = (16 - bytes.len() % 16) as u8;
+  bytes.extend(iter::repeat(pad_len).take(pad_len as usize));
+  assert_eq!(bytes.len() % 16, 0);
+}
+
+pub fn pkcs_depad(bytes: &mut Vec<u8>) -> bool {
+  if bytes.len() < 16 { return false }
+  if bytes.len() % 16 != 0 { return false }
+  let pad_byte = *bytes.last().unwrap();
+  if pad_byte > 16 { return false }
+  let valid_pad = bytes[bytes.len() - pad_byte as usize..].iter().all(|&b| b == pad_byte);
+  if !valid_pad { return false }
+  bytes.truncate(bytes.len() - pad_byte as usize);
+  true
+}
+
 fn aes_ecb(block: &[u8], key: &[u8], mode: Mode) -> Vec<u8> {
   assert_eq!(block.len() % 16, 0);
-  let mut encrypter = Crypter::new(Cipher::aes_128_cbc(), mode, key, None).unwrap();
+  let mut encrypter = Crypter::new(Cipher::aes_128_ecb(), mode, key, None).unwrap();
   encrypter.pad(false);
   let mut out = vec![0;block.len()+16];
   encrypter.update(&block, &mut out).unwrap();
