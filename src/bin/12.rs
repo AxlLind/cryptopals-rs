@@ -1,5 +1,6 @@
 use openssl::rand::rand_bytes;
 use openssl::symm::{Cipher, encrypt};
+use cryptopals_rs::b64;
 
 const INPUT: &str = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
 
@@ -12,7 +13,7 @@ impl Oracle {
   fn new() -> Self {
     let mut key = [0; 16];
     rand_bytes(&mut key).unwrap();
-    let target = cryptopals_rs::base64_decode(INPUT);
+    let target = b64::decode(INPUT);
     Self { key, target }
   }
 

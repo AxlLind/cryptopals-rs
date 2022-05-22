@@ -1,4 +1,4 @@
-use cryptopals_rs;
+use cryptopals_rs::b64;
 use itertools::Itertools;
 
 const INPUT: &str = include_str!("../../inputs/06.in");
@@ -36,7 +36,7 @@ fn crack_single_byte_xor(bytes: &[u8]) -> u8 {
 fn main() {
   assert_eq!(hamming_distance(b"this is a test", b"wokka wokka!!!"), 37);
 
-  let bytes = cryptopals_rs::base64_decode(&INPUT.lines().join(""));
+  let bytes = b64::decode(&INPUT.lines().join(""));
   let keysize = find_key_size(&bytes);
 
   let key = (0..keysize)
