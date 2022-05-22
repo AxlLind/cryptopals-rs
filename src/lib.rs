@@ -2,6 +2,7 @@ use std::iter;
 use itertools::Itertools;
 use openssl::symm::{Cipher, Mode, Crypter};
 
+pub mod mt19937;
 pub mod b64;
 
 fn from_hex_char(c: char) -> Option<u8> {
