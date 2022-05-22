@@ -17,6 +17,10 @@ impl MT19937 {
     Self { v, i: N }
   }
 
+  pub fn from_state(state: [u32; N]) -> Self {
+    Self { v: state, i: 0 }
+  }
+
   pub fn gen(&mut self) -> u32 {
     if self.i >= N { self.twist() }
 
