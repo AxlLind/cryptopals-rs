@@ -54,9 +54,28 @@ mod tests {
   use super::*;
 
   #[test]
-  fn cpp_standard_test() {
+  fn test_cpp_standard() {
     let mut mt19937 = MT19937::from_seed(5489);
     for _ in 0..9999 { mt19937.gen(); }
     assert_eq!(mt19937.gen(), 4123659995);
+  }
+
+  #[test]
+  fn test_zero_seed() {
+    // generated with c++ std::mt19937
+    const EXPECTED: [u32; 10] = [
+      2357136044,
+      2546248239,
+      3071714933,
+      3626093760,
+      2588848963,
+      3684848379,
+      2340255427,
+      3638918503,
+      1819583497,
+      2678185683,
+    ];
+    let mut mt19937 = MT19937::from_seed(0);
+    for x in EXPECTED { assert_eq!(mt19937.gen(), x) }
   }
 }
