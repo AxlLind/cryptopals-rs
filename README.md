@@ -17,7 +17,7 @@ This repo is a work in progress. Challenges solved so far:
   - [ ] Challenge 18
   - [ ] Challenge 19
   - [ ] Challenge 20
-  - [ ] Challenge 21
+  - [x] Challenge 21
   - [ ] Challenge 22
   - [ ] Challenge 23
   - [ ] Challenge 24
