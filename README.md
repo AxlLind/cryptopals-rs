@@ -14,7 +14,7 @@ This repo is a work in progress. Challenges solved so far:
 - [x] Set 2
 - [ ] Set 3
   - [x] Challenge 17
-  - [ ] Challenge 18
+  - [x] Challenge 18
   - [ ] Challenge 19
   - [ ] Challenge 20
   - [x] Challenge 21
