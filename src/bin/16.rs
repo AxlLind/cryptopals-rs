@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use itertools::Itertools;
 use cryptopals_rs::{aes_cbc_encrypt, aes_cbc_decrypt};
 use openssl::rand::rand_bytes;
 
@@ -28,7 +29,7 @@ impl Oracle {
 
   fn decrypt(&self, bytes: &[u8]) -> Vec<u8> {
     let mut plaintext = aes_cbc_decrypt(&bytes, &self.key);
-    cryptopals_rs::pkcs_depad(&mut plaintext);
+    assert!(cryptopals_rs::pkcs_depad(&mut plaintext));
     plaintext
   }
 }
@@ -39,20 +40,19 @@ fn main() {
 
   let xor_block = b";admin=true;add=".iter()
     .zip(b";comment2=%20lik")
-    .map(|(&a, &b)| a^b)
-    .collect::<Vec<_>>();
-  for i in 0..16 {
-    ciphertext[32+i] ^= xor_block[i];
+    .map(|(&a, &b)| a^b);
+  for (i,x) in xor_block.enumerate() {
+    ciphertext[32+i] ^= x;
   }
+  let plaintext = oracle.decrypt(&ciphertext).iter()
+    .map(|&b| b as char)
+    .collect::<String>();
 
-  let plaintext = oracle.decrypt(&ciphertext).iter().map(|&b| b as char).collect::<String>();
   let props = plaintext.split(';')
-    .map(|s| {
-      s.split_once('=').unwrap()
-    })
+    .map(|s| s.split_once('=').unwrap())
     .collect::<HashMap<_,_>>();
   assert_eq!(props.get("admin"), Some(&"true"));
-  for (k,v) in props {
-    println!("{}={:?}", k, v);
+  for (k,v) in props.iter().sorted() {
+    println!("{} = {:?}", k, v);
   }
 }
