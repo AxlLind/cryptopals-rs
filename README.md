@@ -13,7 +13,7 @@ This repo is a work in progress. Challenges solved so far:
 - [x] Set 1
 - [x] Set 2
 - [ ] Set 3
-  - [ ] Challenge 17
+  - [x] Challenge 17
   - [ ] Challenge 18
   - [ ] Challenge 19
   - [ ] Challenge 20
