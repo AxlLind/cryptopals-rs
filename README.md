@@ -12,16 +12,17 @@ cargo run --release --bin 01  # replace 01 with the challenge to run
 This repo is a work in progress. Challenges solved so far:
 - [x] Set 1
 - [x] Set 2
-- [ ] Set 3
-  - [x] Challenge 17
-  - [x] Challenge 18
-  - [x] Challenge 19
-  - [x] Challenge 20
-  - [x] Challenge 21
-  - [x] Challenge 22
-  - [x] Challenge 23
-  - [x] Challenge 24
+- [x] Set 3
 - [ ] Set 4
+  - [ ] Challenge 25
+  - [ ] Challenge 26
+  - [ ] Challenge 27
+  - [ ] Challenge 28
+  - [ ] Challenge 29
+  - [ ] Challenge 30
+  - [ ] Challenge 31
+  - [ ] Challenge 31
+  - [ ] Challenge 32
 - [ ] Set 5
 - [ ] Set 6
 - [ ] Set 7
