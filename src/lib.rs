@@ -106,6 +106,16 @@ pub fn aes_cbc_encrypt(block: &[u8], key: &[u8]) -> Vec<u8> {
   aes(block, key, Cipher::aes_128_cbc(), Mode::Encrypt)
 }
 
+pub fn aes_ctr(key: &[u8; 16], nonce: &[u8; 8], plaintext: &[u8]) -> Vec<u8> {
+  let ctr_stream = (0u64..).flat_map(|counter| {
+    let mut block = [0; 16];
+    block[..8].copy_from_slice(nonce);
+    block[8..].copy_from_slice(&counter.to_le_bytes());
+    aes_ecb_encrypt(&block, key)
+  });
+  ctr_stream.zip(plaintext).map(|(a, &b)| a ^ b).collect()
+}
+
 pub fn rand_range(min: u64, max: u64) -> u64 {
   let range = max - min;
   let mut r = range+1;
