@@ -2,13 +2,6 @@ use cryptopals_rs::mt19937::MT19937;
 use openssl::rand::rand_bytes;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-fn unix_timestamp() -> u32 {
-  SystemTime::now()
-    .duration_since(UNIX_EPOCH)
-    .unwrap()
-    .as_secs() as u32
-}
-
 fn mt19937_cipher(key: u16, bytes: &[u8]) -> Vec<u8> {
   let mut mt19937 = MT19937::from_seed(key as u32);
   let key_stream = (0..).flat_map(|_| mt19937.gen().to_be_bytes());
@@ -36,16 +29,11 @@ impl Oracle {
   fn guess(&self, key: u16) -> bool { self.key == key }
 }
 
-// Use your function to encrypt a known plaintext (say, 14 consecutive 'A' characters) prefixed by a random number of random characters.
-
-// From the ciphertext, recover the "key" (the 16 bit seed).
-
-// Use the same idea to generate a random "password reset token" using MT19937 seeded from the current time.
-
-// Write a function to check if any given password token is actually the product of an MT19937 PRNG seeded with the current time.
-
 fn gen_pw_reset_token() -> Vec<u8> {
-  let key = unix_timestamp() as u16;
+  let key = SystemTime::now()
+    .duration_since(UNIX_EPOCH)
+    .unwrap()
+    .as_secs() as u16;
   let mut mt19937 = MT19937::from_seed(key as u32);
   (0..).flat_map(|_| mt19937.gen().to_be_bytes()).take(32).collect()
 }
