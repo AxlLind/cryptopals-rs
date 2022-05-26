@@ -4,18 +4,17 @@ use itertools::Itertools;
 // challenge 28 says to find an implementation online,
 // however implementing it yourself is more fun
 
-fn process_block(h: [u32; 5], block: impl Iterator<Item=u8>) -> [u32; 5] {
+fn process_block(h: [u32; 5], mut block: impl Iterator<Item=u8>) -> [u32; 5] {
   let mut w = [0; 80];
-  let mut bytes = block.into_iter();
   for i in 0..16 {
     w[i] = u32::from_be_bytes([
-      bytes.next().expect("Block has to be 512 bits"),
-      bytes.next().expect("Block has to be 512 bits"),
-      bytes.next().expect("Block has to be 512 bits"),
-      bytes.next().expect("Block has to be 512 bits"),
+      block.next().expect("Block has to be 512 bits"),
+      block.next().expect("Block has to be 512 bits"),
+      block.next().expect("Block has to be 512 bits"),
+      block.next().expect("Block has to be 512 bits"),
     ]);
   }
-  assert!(bytes.next().is_none());
+  assert!(block.next().is_none());
   for i in 16..80 {
     w[i] = (w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16]).rotate_left(1);
   }
