@@ -1,6 +1,9 @@
 use std::iter;
 use itertools::Itertools;
 
+// challenge 28 says to find an implementation online,
+// however implementing it yourself is more fun
+
 fn process_block(h: [u32; 5], block: impl Iterator<Item=u8>) -> [u32; 5] {
   let mut w = [0; 80];
   let mut bytes = block.into_iter();
@@ -56,17 +59,15 @@ pub fn sha1(bytes: &[u8]) -> [u8; 20] {
   sha1_from_state(initial_h, bytes)
 }
 
-
 #[cfg(test)]
 mod tests {
   use super::*;
   use crate::to_hex_str;
 
   macro_rules! assert_sha1_eq {
-    ($expected:expr, $input:expr) => {{
-      let sha1_hash = sha1($input);
-      assert_eq!($expected, to_hex_str(&sha1_hash));
-    }};
+    ($expected:expr, $input:expr) => {
+      assert_eq!($expected, to_hex_str(&sha1($input)))
+    };
   }
 
   #[test]

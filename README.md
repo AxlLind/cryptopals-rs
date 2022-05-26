@@ -6,6 +6,7 @@ This repo contains solutions to the challenges written in Rust.
 # Usage
 ```bash
 cargo run --release --bin 01  # replace 01 with the challenge to run
+cargo test --release --lib    # to run library tests
 ```
 
 # Progress
