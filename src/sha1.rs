@@ -32,10 +32,11 @@ pub fn sha1_padding(len: usize) -> impl Iterator<Item=u8> {
   iter::once(0x80).pad_using(padding, |_| 0).chain((8 * len as u64).to_be_bytes())
 }
 
-pub fn sha1_from_state(h: [u32; 5], bytes: &[u8]) -> [u8; 20] {
+pub fn sha1_from_state(h: [u32; 5], pre_len: usize, bytes: &[u8]) -> [u8; 20] {
+  assert!(pre_len % 64 == 0);
   let final_state = bytes.iter()
     .copied()
-    .chain(sha1_padding(bytes.len()))
+    .chain(sha1_padding(pre_len + bytes.len()))
     .chunks(64)
     .into_iter()
     .fold(h, process_block);
@@ -48,7 +49,7 @@ pub fn sha1_from_state(h: [u32; 5], bytes: &[u8]) -> [u8; 20] {
 
 pub fn sha1(bytes: &[u8]) -> [u8; 20] {
   let initial_h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
-  sha1_from_state(initial_h, bytes)
+  sha1_from_state(initial_h, 0, bytes)
 }
 
 #[cfg(test)]

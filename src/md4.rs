@@ -50,10 +50,10 @@ pub fn md4_padding(len: usize) -> impl Iterator<Item=u8> {
   iter::once(0x80).pad_using(padding, |_| 0).chain((8 * len as u64).to_le_bytes())
 }
 
-pub fn md4_from_state(h: [u32; 4], bytes: &[u8]) -> [u8; 16] {
+pub fn md4_from_state(h: [u32; 4], pre_len: usize, bytes: &[u8]) -> [u8; 16] {
   let final_state = bytes.iter()
     .copied()
-    .chain(md4_padding(bytes.len()))
+    .chain(md4_padding(pre_len + bytes.len()))
     .chunks(64)
     .into_iter()
     .fold(h, process_block);
@@ -66,7 +66,7 @@ pub fn md4_from_state(h: [u32; 4], bytes: &[u8]) -> [u8; 16] {
 
 pub fn md4(bytes: &[u8]) -> [u8; 16] {
   let initial_state = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
-  md4_from_state(initial_state, bytes)
+  md4_from_state(initial_state, 0, bytes)
 }
 
 #[cfg(test)]
