@@ -32,7 +32,7 @@ async fn index(payload: web::Query<Payload>) -> impl Responder {
   if file != "secret.txt" {
     return HttpResponse::InternalServerError().finish();
   }
-  let sha1_mac = cryptopals_rs::hmac::hmac_sha1(&KEY, &SECRET_TXT);
+  let sha1_mac = cryptopals_rs::sha1::hmac(&KEY, &SECRET_TXT);
   let proposed_mac = cryptopals_rs::from_hex_str(&signature);
   if proposed_mac.is_none() {
     return HttpResponse::InternalServerError().finish();

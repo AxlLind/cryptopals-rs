@@ -52,19 +52,32 @@ pub fn sha1(bytes: &[u8]) -> [u8; 20] {
   sha1_from_state(initial_h, 0, bytes)
 }
 
+// note that keys larger than block size is not implemented
+pub fn hmac(key: &[u8], bytes: &[u8]) -> [u8; 20] {
+  assert!(key.len() <= 64);
+  let mut k = [0; 64];
+  k[..key.len()].copy_from_slice(key);
+  let inner = k.iter().map(|&b| b ^ 0x36).chain(bytes.iter().copied()).collect::<Vec<_>>();
+  let inner_hash = sha1(&inner);
+  let tmp = k.iter().map(|&b| b ^ 0x5c)
+    .chain(inner_hash)
+    .collect::<Vec<_>>();
+  sha1(&tmp)
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::to_hex_str;
-
-  macro_rules! assert_sha1_eq {
-    ($expected:expr, $input:expr) => {
-      assert_eq!($expected, to_hex_str(&sha1($input)))
-    };
-  }
+  use crate::{to_hex_str, from_hex_str};
 
   #[test]
   fn known_test_vectors() {
+    macro_rules! assert_sha1_eq {
+      ($expected:expr, $input:expr) => {
+        assert_eq!($expected, to_hex_str(&sha1($input)))
+      };
+    }
+
     // source: https://en.wikipedia.org/wiki/SHA-1#Example_hashes
     assert_sha1_eq!("da39a3ee5e6b4b0d3255bfef95601890afd80709", b"");
     assert_sha1_eq!("2fd4e1c67a2d28fced849ee1bb76e7391b93eb12", b"The quick brown fox jumps over the lazy dog");
@@ -75,5 +88,21 @@ mod tests {
     assert_sha1_eq!("84983e441c3bd26ebaae4aa1f95129e5e54670f1", b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
     assert_sha1_eq!("a49b2446a02c645bf419f995b67091253a04a259", b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
     assert_sha1_eq!("34aa973cd4c4daa4f61eeb2bdbad27316534016f", &[b'a'; 1_000_000]);
+  }
+
+  #[test]
+  fn hmac_known_test_vectors() {
+    macro_rules! assert_hmac_sha1_eq {
+      ($expected:expr, $key:expr, $input:expr) => {
+        assert_eq!($expected, to_hex_str(&hmac($key, $input)))
+      };
+    }
+
+    // source: https://datatracker.ietf.org/doc/html/rfc2202
+    assert_hmac_sha1_eq!("b617318655057264e28bc0b6fb378c8ef146be00", &[0x0b; 20], b"Hi There");
+    assert_hmac_sha1_eq!("effcdf6ae5eb2fa2d27416d5f184df9c259a7c79", b"Jefe", b"what do ya want for nothing?");
+    assert_hmac_sha1_eq!("125d7342b9ac11cd91a39af48aa17b4f63f175d3", &[0xaa; 20], &[0xdd; 50]);
+    assert_hmac_sha1_eq!("4c1a03424b55e07fe7f27be1d58bb9324a9a5a04", &[0x0c; 20], b"Test With Truncation");
+    assert_hmac_sha1_eq!("4c9007f4026250c6bc8414f9bf50c86c2d7235da", &from_hex_str("0102030405060708090a0b0c0d0e0f10111213141516171819").unwrap(), &[0xcd; 50]);
   }
 }
