@@ -54,9 +54,12 @@ pub fn sha1(bytes: &[u8]) -> [u8; 20] {
 
 // note that keys larger than block size is not implemented
 pub fn hmac(key: &[u8], bytes: &[u8]) -> [u8; 20] {
-  assert!(key.len() <= 64);
   let mut k = [0; 64];
-  k[..key.len()].copy_from_slice(key);
+  if key.len() <= 64 {
+    k[..key.len()].copy_from_slice(key);
+  } else {
+    k[..20].copy_from_slice(&sha1(key));
+  }
   let inner = k.iter().map(|&b| b ^ 0x36).chain(bytes.iter().copied()).collect::<Vec<_>>();
   let inner_hash = sha1(&inner);
   let tmp = k.iter().map(|&b| b ^ 0x5c)
@@ -104,5 +107,7 @@ mod tests {
     assert_hmac_sha1_eq!("125d7342b9ac11cd91a39af48aa17b4f63f175d3", &[0xaa; 20], &[0xdd; 50]);
     assert_hmac_sha1_eq!("4c1a03424b55e07fe7f27be1d58bb9324a9a5a04", &[0x0c; 20], b"Test With Truncation");
     assert_hmac_sha1_eq!("4c9007f4026250c6bc8414f9bf50c86c2d7235da", &from_hex_str("0102030405060708090a0b0c0d0e0f10111213141516171819").unwrap(), &[0xcd; 50]);
+    assert_hmac_sha1_eq!("aa4ae5e15272d00e95705637ce8a3b55ed402112", &[0xaa; 80], b"Test Using Larger Than Block-Size Key - Hash Key First");
+    assert_hmac_sha1_eq!("e8e99d0f45237d786d6bbaa7965c7808bbff1a91", &[0xaa; 80], b"Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data");
   }
 }
