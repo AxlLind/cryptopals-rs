@@ -1,30 +1,16 @@
 use std::iter;
 use itertools::Itertools;
 
-// Implemented myself following the RFC:
+// Implemented myself following the RFC.
 // source: https://datatracker.ietf.org/doc/html/rfc1186
+
+const ROUND1_PARAMS: [(usize, u32); 16] = [(0,3),(1,7),(2,11),(3,19),(4,3),(5,7),(6,11),(7,19),(8,3),(9,7),(10,11),(11,19),(12,3),(13,7),(14,11),(15,19)];
+const ROUND2_PARAMS: [(usize, u32); 16] = [(0,3),(4,5),(8,9),(12,13),(1,3),(5,5),(9,9),(13,13),(2,3),(6,5),(10,9),(14,13),(3,3),(7,5),(11,9),(15,13)];
+const ROUND3_PARAMS: [(usize, u32); 16] = [(0,3),(8,9),(4,11),(12,15),(2,3),(10,9),(6,11),(14,15),(1,3),(9,9),(5,11),(13,15),(3,3),(11,9),(7,11),(15,15)];
 
 fn f(x: u32, y: u32, z: u32) -> u32 { (x & y) | (!x & z) }
 fn g(x: u32, y: u32, z: u32) -> u32 { (x & y) | (x & z) | (y & z) }
 fn h(x: u32, y: u32, z: u32) -> u32 { x ^ y ^ z }
-
-macro_rules! round1 {
-  ($x:expr, $a:expr, $b:expr, $c:expr, $d:expr, $i:expr, $s:expr) => {
-    $a = ($a + f($b, $c, $d) + $x[$i]).rotate_left($s)
-  };
-}
-
-macro_rules! round2 {
-  ($x:expr, $a:expr, $b:expr, $c:expr, $d:expr, $i:expr, $s:expr) => {
-    $a = ($a + g($b, $c, $d) + $x[$i] + 0x5A827999).rotate_left($s)
-  };
-}
-
-macro_rules! round3 {
-  ($x:expr, $a:expr, $b:expr, $c:expr, $d:expr, $i:expr, $s:expr) => {
-    $a = ($a + h($b, $c, $d) + $x[$i] + 0x6ED9EBA1).rotate_left($s)
-  };
-}
 
 fn process_block(s: [u32; 4], mut block: impl Iterator<Item=u8>) -> [u32; 4] {
   let mut x = [0; 16];
@@ -39,57 +25,29 @@ fn process_block(s: [u32; 4], mut block: impl Iterator<Item=u8>) -> [u32; 4] {
   assert!(block.next().is_none());
 
   let [mut a, mut b, mut c, mut d] = s.clone();
-  round1!(x, a, b, c, d, 0, 3);
-  round1!(x, d, a, b, c, 1, 7);
-  round1!(x, c, d, a, b, 2, 11);
-  round1!(x, b, c, d, a, 3, 19);
-  round1!(x, a, b, c, d, 4, 3);
-  round1!(x, d, a, b, c, 5, 7);
-  round1!(x, c, d, a, b, 6, 11);
-  round1!(x, b, c, d, a, 7, 19);
-  round1!(x, a, b, c, d, 8, 3);
-  round1!(x, d, a, b, c, 9, 7);
-  round1!(x, c, d, a, b, 10, 11);
-  round1!(x, b, c, d, a, 11, 19);
-  round1!(x, a, b, c, d, 12, 3);
-  round1!(x, d, a, b, c, 13, 7);
-  round1!(x, c, d, a, b, 14, 11);
-  round1!(x, b, c, d, a, 15, 19);
-
-  round2!(x, a, b, c, d, 0, 3);
-  round2!(x, d, a, b, c, 4, 5);
-  round2!(x, c, d, a, b, 8, 9);
-  round2!(x, b, c, d, a, 12, 13);
-  round2!(x, a, b, c, d, 1, 3);
-  round2!(x, d, a, b, c, 5, 5);
-  round2!(x, c, d, a, b, 9, 9);
-  round2!(x, b, c, d, a, 13, 13);
-  round2!(x, a, b, c, d, 2, 3);
-  round2!(x, d, a, b, c, 6, 5);
-  round2!(x, c, d, a, b, 10, 9);
-  round2!(x, b, c, d, a, 14, 13);
-  round2!(x, a, b, c, d, 3, 3);
-  round2!(x, d, a, b, c, 7, 5);
-  round2!(x, c, d, a, b, 11, 9);
-  round2!(x, b, c, d, a, 15, 13);
-
-  round3!(x, a, b, c, d, 0, 3);
-  round3!(x, d, a, b, c, 8, 9);
-  round3!(x, c, d, a, b, 4, 11);
-  round3!(x, b, c, d, a, 12, 15);
-  round3!(x, a, b, c, d, 2, 3);
-  round3!(x, d, a, b, c, 10, 9);
-  round3!(x, c, d, a, b, 6, 11);
-  round3!(x, b, c, d, a, 14, 15);
-  round3!(x, a, b, c, d, 1, 3);
-  round3!(x, d, a, b, c, 9, 9);
-  round3!(x, c, d, a, b, 5, 11);
-  round3!(x, b, c, d, a, 13, 15);
-  round3!(x, a, b, c, d, 3, 3);
-  round3!(x, d, a, b, c, 11, 9);
-  round3!(x, c, d, a, b, 7, 11);
-  round3!(x, b, c, d, a, 15, 15);
-
+  macro_rules! md4round {
+    ($params:ident, $f:ident, $n:expr) => {
+      a = (a + $f(b, c, d) + $n + x[$params[0].0]).rotate_left($params[0].1);
+      d = (d + $f(a, b, c) + $n + x[$params[1].0]).rotate_left($params[1].1);
+      c = (c + $f(d, a, b) + $n + x[$params[2].0]).rotate_left($params[2].1);
+      b = (b + $f(c, d, a) + $n + x[$params[3].0]).rotate_left($params[3].1);
+      a = (a + $f(b, c, d) + $n + x[$params[4].0]).rotate_left($params[4].1);
+      d = (d + $f(a, b, c) + $n + x[$params[5].0]).rotate_left($params[5].1);
+      c = (c + $f(d, a, b) + $n + x[$params[6].0]).rotate_left($params[6].1);
+      b = (b + $f(c, d, a) + $n + x[$params[7].0]).rotate_left($params[7].1);
+      a = (a + $f(b, c, d) + $n + x[$params[8].0]).rotate_left($params[8].1);
+      d = (d + $f(a, b, c) + $n + x[$params[9].0]).rotate_left($params[9].1);
+      c = (c + $f(d, a, b) + $n + x[$params[10].0]).rotate_left($params[10].1);
+      b = (b + $f(c, d, a) + $n + x[$params[11].0]).rotate_left($params[11].1);
+      a = (a + $f(b, c, d) + $n + x[$params[12].0]).rotate_left($params[12].1);
+      d = (d + $f(a, b, c) + $n + x[$params[13].0]).rotate_left($params[13].1);
+      c = (c + $f(d, a, b) + $n + x[$params[14].0]).rotate_left($params[14].1);
+      b = (b + $f(c, d, a) + $n + x[$params[15].0]).rotate_left($params[15].1);
+    }
+  }
+  md4round!(ROUND1_PARAMS, f, 0);
+  md4round!(ROUND2_PARAMS, g, 0x5A827999);
+  md4round!(ROUND3_PARAMS, h, 0x6ED9EBA1);
   [s[0]+a, s[1]+b, s[2]+c, s[3]+d]
 }
 
