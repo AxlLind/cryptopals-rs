@@ -7,18 +7,13 @@ use itertools::Itertools;
 fn process_block(h: [u32; 5], mut block: impl Iterator<Item=u8>) -> [u32; 5] {
   let mut w = [0; 80];
   for i in 0..16 {
-    w[i] = u32::from_be_bytes([
-      block.next().expect("Block has to be 512 bits"),
-      block.next().expect("Block has to be 512 bits"),
-      block.next().expect("Block has to be 512 bits"),
-      block.next().expect("Block has to be 512 bits"),
-    ]);
+    let (a,b,c,d) = block.next_tuple().unwrap();
+    w[i] = u32::from_be_bytes([a,b,c,d]);
   }
-  assert!(block.next().is_none());
   for i in 16..80 {
     w[i] = (w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16]).rotate_left(1);
   }
-  let [mut a, mut b, mut c, mut d, mut e] = h.clone();
+  let [mut a, mut b, mut c, mut d, mut e] = h;
   for i in 0..80 {
     let (k, f) = match i {
       0..=19  => (0x5A827999, (b & c) | (!b & d)),
@@ -33,10 +28,8 @@ fn process_block(h: [u32; 5], mut block: impl Iterator<Item=u8>) -> [u32; 5] {
 }
 
 pub fn sha1_padding(len: usize) -> impl Iterator<Item=u8> {
-  let padding = if len % 64 < 56 {0} else {64} + 55 - len % 64;
-  iter::once(0x80)
-    .chain(iter::repeat(0).take(padding))
-    .chain((8 * len as u64).to_be_bytes())
+  let padding = if len % 64 < 56 {0} else {64} + 56 - len % 64;
+  iter::once(0x80).pad_using(padding, |_| 0).chain((8 * len as u64).to_be_bytes())
 }
 
 pub fn sha1_from_state(h: [u32; 5], bytes: &[u8]) -> [u8; 20] {

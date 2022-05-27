@@ -15,16 +15,10 @@ fn h(x: u32, y: u32, z: u32) -> u32 { x ^ y ^ z }
 fn process_block(s: [u32; 4], mut block: impl Iterator<Item=u8>) -> [u32; 4] {
   let mut x = [0; 16];
   for i in 0..16 {
-    x[i] = u32::from_le_bytes([
-      block.next().expect("Block has to be 512 bits"),
-      block.next().expect("Block has to be 512 bits"),
-      block.next().expect("Block has to be 512 bits"),
-      block.next().expect("Block has to be 512 bits"),
-    ]);
+    let (a,b,c,d) = block.next_tuple().unwrap();
+    x[i] = u32::from_le_bytes([a,b,c,d]);
   }
-  assert!(block.next().is_none());
-
-  let [mut a, mut b, mut c, mut d] = s.clone();
+  let [mut a, mut b, mut c, mut d] = s;
   macro_rules! md4round {
     ($params:ident, $f:ident, $n:expr) => {
       a = (a + $f(b, c, d) + $n + x[$params[0].0]).rotate_left($params[0].1);
@@ -52,10 +46,8 @@ fn process_block(s: [u32; 4], mut block: impl Iterator<Item=u8>) -> [u32; 4] {
 }
 
 pub fn md4_padding(len: usize) -> impl Iterator<Item=u8> {
-  let padding = if len % 64 < 56 {0} else {64} + 55 - len % 64;
-  iter::once(0x80)
-    .chain(iter::repeat(0).take(padding))
-    .chain((8 * len as u64).to_le_bytes())
+  let padding = if len % 64 < 56 {0} else {64} + 56 - len % 64;
+  iter::once(0x80).pad_using(padding, |_| 0).chain((8 * len as u64).to_le_bytes())
 }
 
 pub fn md4_from_state(h: [u32; 4], bytes: &[u8]) -> [u8; 16] {
