@@ -5,8 +5,9 @@ This repo contains solutions to the challenges written in Rust.
 
 # Usage
 ```bash
-cargo run --release --bin 01  # replace 01 with the challenge to run
-cargo test --release --lib    # to run library tests
+cargo run --release --bin 01               # replace 01 with the challenge to run
+cargo run --release -p web_timing --bin 31 # for challenges 31 and 32
+cargo test --release --lib                 # to run library tests
 ```
 
 # Progress
@@ -21,8 +22,7 @@ This repo is a work in progress. Challenges solved so far:
   - [x] Challenge 28
   - [x] Challenge 29
   - [x] Challenge 30
-  - [ ] Challenge 31
-  - [ ] Challenge 31
+  - [x] Challenge 31
   - [ ] Challenge 32
 - [ ] Set 5
 - [ ] Set 6
