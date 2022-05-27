@@ -63,15 +63,12 @@ mod tests {
   }
 
   #[test]
-  fn wikipedia_test_vectors() {
-    // testcase from wiki: https://en.wikipedia.org/wiki/SHA-1#Example_hashes
+  fn known_test_vectors() {
+    // source: https://en.wikipedia.org/wiki/SHA-1#Example_hashes
     assert_sha1_eq!("da39a3ee5e6b4b0d3255bfef95601890afd80709", b"");
     assert_sha1_eq!("2fd4e1c67a2d28fced849ee1bb76e7391b93eb12", b"The quick brown fox jumps over the lazy dog");
     assert_sha1_eq!("de9f2c7fd25e1b3afad3e85a0bd17d9b100db4b3", b"The quick brown fox jumps over the lazy cog");
-  }
 
-  #[test]
-  fn edge_case_test_vectors() {
     // source: https://www.di-mgt.com.au/sha_testvectors.html
     assert_sha1_eq!("a9993e364706816aba3e25717850c26c9cd0d89d", b"abc");
     assert_sha1_eq!("84983e441c3bd26ebaae4aa1f95129e5e54670f1", b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");

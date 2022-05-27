@@ -81,7 +81,7 @@ mod tests {
   }
 
   #[test]
-  fn wikipedia_test_vectors() {
+  fn known_test_vectors() {
     // testcase from wiki: https://en.wikipedia.org/wiki/MD4#MD4_test_vectors
     assert_md4_eq!("31d6cfe0d16ae931b73c59d7e0c089c0", b"");
     assert_md4_eq!("bde52cb31de33e46245e05fbdbd6fb24", b"a");
