@@ -52,7 +52,6 @@ pub fn sha1(bytes: &[u8]) -> [u8; 20] {
   sha1_from_state(initial_h, 0, bytes)
 }
 
-// note that keys larger than block size is not implemented
 pub fn hmac(key: &[u8], bytes: &[u8]) -> [u8; 20] {
   let mut k = [0; 64];
   if key.len() <= 64 {
