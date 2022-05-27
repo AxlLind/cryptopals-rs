@@ -42,7 +42,7 @@ fn process_block(s: [u32; 4], mut block: impl Iterator<Item=u8>) -> [u32; 4] {
       a = (a + $f(b, c, d) + $n + x[$params[12].0]).rotate_left($params[12].1);
       d = (d + $f(a, b, c) + $n + x[$params[13].0]).rotate_left($params[13].1);
       c = (c + $f(d, a, b) + $n + x[$params[14].0]).rotate_left($params[14].1);
-      b = (b + $f(c, d, a) + $n + x[$params[15].0]).rotate_left($params[15].1);
+      b = (b + $f(c, d, a) + $n + x[$params[15].0]).rotate_left($params[15].1)
     }
   }
   md4round!(ROUND1_PARAMS, f, 0);
@@ -51,17 +51,17 @@ fn process_block(s: [u32; 4], mut block: impl Iterator<Item=u8>) -> [u32; 4] {
   [s[0]+a, s[1]+b, s[2]+c, s[3]+d]
 }
 
-pub fn md4_padding(bytes: &[u8]) -> impl Iterator<Item=u8> + '_ {
-  let padding = if bytes.len() % 64 < 56 {0} else {64} + 55 - bytes.len() % 64;
-  bytes.iter()
-    .copied()
-    .chain(iter::once(0x80))
+pub fn md4_padding(len: usize) -> impl Iterator<Item=u8> {
+  let padding = if len % 64 < 56 {0} else {64} + 55 - len % 64;
+  iter::once(0x80)
     .chain(iter::repeat(0).take(padding))
-    .chain((8 * bytes.len() as u64).to_le_bytes())
+    .chain((8 * len as u64).to_le_bytes())
 }
 
 pub fn md4_from_state(h: [u32; 4], bytes: &[u8]) -> [u8; 16] {
-  let final_state = md4_padding(bytes)
+  let final_state = bytes.iter()
+    .copied()
+    .chain(md4_padding(bytes.len()))
     .chunks(64)
     .into_iter()
     .fold(h, process_block);

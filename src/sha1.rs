@@ -32,17 +32,17 @@ fn process_block(h: [u32; 5], mut block: impl Iterator<Item=u8>) -> [u32; 5] {
   [h[0]+a, h[1]+b, h[2]+c, h[3]+d, h[4]+e]
 }
 
-pub fn sha1_padding(bytes: &[u8]) -> impl Iterator<Item=u8> + '_ {
-  let padding = if bytes.len() % 64 < 56 {0} else {64} + 55 - bytes.len() % 64;
-  bytes.iter()
-    .copied()
-    .chain(iter::once(0x80))
+pub fn sha1_padding(len: usize) -> impl Iterator<Item=u8> {
+  let padding = if len % 64 < 56 {0} else {64} + 55 - len % 64;
+  iter::once(0x80)
     .chain(iter::repeat(0).take(padding))
-    .chain((8 * bytes.len() as u64).to_be_bytes())
+    .chain((8 * len as u64).to_be_bytes())
 }
 
 pub fn sha1_from_state(h: [u32; 5], bytes: &[u8]) -> [u8; 20] {
-  let final_state = sha1_padding(bytes)
+  let final_state = bytes.iter()
+    .copied()
+    .chain(sha1_padding(bytes.len()))
     .chunks(64)
     .into_iter()
     .fold(h, process_block);
