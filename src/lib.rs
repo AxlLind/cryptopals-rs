@@ -6,6 +6,7 @@ pub mod mt19937;
 pub mod b64;
 pub mod sha1;
 pub mod md4;
+pub mod hmac;
 
 fn from_hex_char(c: char) -> Option<u8> {
   match c {
