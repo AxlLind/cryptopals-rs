@@ -20,14 +20,13 @@ impl Oracle {
     sha1::sha1(&input)
   }
 
-  fn verify_mac(&self, bytes: &[u8], mac: &[u8]) -> bool {
-    let actual_mac = self.mac(bytes);
-    actual_mac == mac
+  fn verify(&self, bytes: &[u8], mac: &[u8]) -> bool {
+    self.mac(bytes) == mac
   }
 }
 
 fn main() {
   let oracle = Oracle::new();
   let mac = oracle.mac(b"YELLOW SUBMARINE");
-  assert!(oracle.verify_mac(b"YELLOW SUBMARINE", &mac));
+  assert!(oracle.verify(b"YELLOW SUBMARINE", &mac));
 }
