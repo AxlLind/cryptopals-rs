@@ -5,6 +5,7 @@ edition = "2021"
 default-run = "web_timing"
 
 [dependencies]
+cryptopals-rs = { path = ".." }
 itertools = "0.10"
 once_cell = "1.12.0"
 actix-web = "4.0.1"
