@@ -1,16 +1,19 @@
 use std::time::{Duration, Instant};
 use rayon::prelude::*;
 
-fn find_byte(mac: [u8; 20], i: usize) -> u8 {
-  (0..=0xff).into_par_iter().max_by_key(|&b| {
-    let mut mac = mac;
-    mac[i] = b;
-    let signature = cryptopals_rs::to_hex_str(&mac);
-    let url = format!("http://localhost:9000/test?file=secret.txt&signature={}", signature);
+fn test_byte(mut mac: [u8; 20], i: usize, b: u8) -> u128 {
+  mac[i] = b;
+  let signature = cryptopals_rs::to_hex_str(&mac);
+  let url = format!("http://localhost:9000/test?file=secret.txt&signature={}", signature);
+  (0..10).into_par_iter().map(|_| {
     let now = Instant::now();
-    reqwest::blocking::get(url).unwrap();
+    reqwest::blocking::get(&url).unwrap();
     now.elapsed().as_micros()
-  }).unwrap()
+  }).sum()
+}
+
+fn find_byte(mac: [u8; 20], i: usize) -> u8 {
+  (0..=0xff).into_par_iter().max_by_key(|&b| test_byte(mac, i, b)).unwrap()
 }
 
 fn main() {
