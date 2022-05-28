@@ -12,3 +12,5 @@ overflow-checks = false
 [dependencies]
 itertools = "0.10"
 openssl = "0.10"
+rand = "0.8"
+num-bigint = { version = "0.4", features = ["rand"] }
