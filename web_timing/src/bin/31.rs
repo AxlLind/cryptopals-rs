@@ -15,7 +15,7 @@ fn find_byte(mac: [u8; 20], i: usize) -> u8 {
 
 fn main() {
   // warning: this takes several minutes to run
-  let mut server_process = web_timing::build_and_spawn_server();
+  let mut server_process = web_timing::build_and_spawn_server(50);
   std::thread::sleep(Duration::from_secs(2)); // wait for server to boot
 
   println!("Starting timing attack...");

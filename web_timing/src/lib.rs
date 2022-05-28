@@ -1,6 +1,6 @@
 use std::process::{Command, Stdio, Child};
 
-pub fn build_and_spawn_server() -> Child {
+pub fn build_and_spawn_server(sleep_ms: usize) -> Child {
   println!("Building server...");
   let build_status = Command::new("cargo")
     .args(["build", "--quiet", "--release", "-p", "web_timing"])
@@ -10,7 +10,7 @@ pub fn build_and_spawn_server() -> Child {
 
   println!("Launching server...");
   Command::new("cargo")
-    .args(["run", "--quiet", "--release", "-p", "web_timing", "--", "50"])
+    .args(["run", "--quiet", "--release", "-p", "web_timing", "--", &sleep_ms.to_string()])
     .stdout(Stdio::null())
     .spawn()
     .expect("failed to launch server")
