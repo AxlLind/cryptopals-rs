@@ -20,7 +20,7 @@ This repo is a work in progress. Challenges solved so far:
   - [x] Challenge 33
   - [x] Challenge 34
   - [x] Challenge 35
-  - [ ] Challenge 36
+  - [x] Challenge 36
   - [ ] Challenge 37
   - [ ] Challenge 38
   - [ ] Challenge 39
