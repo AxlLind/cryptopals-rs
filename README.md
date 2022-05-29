@@ -19,7 +19,7 @@ This repo is a work in progress. Challenges solved so far:
 - [ ] [Set 5](https://cryptopals.com/sets/5)
   - [x] Challenge 33
   - [x] Challenge 34
-  - [ ] Challenge 35
+  - [x] Challenge 35
   - [ ] Challenge 36
   - [ ] Challenge 37
   - [ ] Challenge 38
