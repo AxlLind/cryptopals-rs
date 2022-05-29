@@ -8,14 +8,14 @@ const G: Lazy<BigUint> = Lazy::new(|| 2.to_biguint().unwrap());
 const P: Lazy<BigUint> = Lazy::new(|| BigUint::parse_bytes(NIST_MODULI, 16).unwrap());
 const PASSWORD: &[u8] = b"Some super strong password!!#";
 
-struct Server {
+struct SrpServer {
   salt: [u8; 32],
   v: BigUint,
   b: BigUint,
   B: BigUint,
 }
 
-impl Server {
+impl SrpServer {
   fn new() -> Self {
     let mut salt = [0; 32];
     openssl::rand::rand_bytes(&mut salt).unwrap();
@@ -47,12 +47,12 @@ impl Server {
   }
 }
 
-struct Client {
+struct SrpClient {
   a: BigUint,
   A: BigUint,
 }
 
-impl Client {
+impl SrpClient {
   fn new() -> Self {
     let mut rng = rand::thread_rng();
     let a = rng.gen_biguint_below(&P);
@@ -80,8 +80,8 @@ impl Client {
 }
 
 fn main() {
-  let server = Server::new();
-  let client = Client::new();
+  let server = SrpServer::new();
+  let client = SrpClient::new();
 
   let hmac = client.compute_hmac(server.public_key(), &server.salt, &PASSWORD);
   assert!(server.verify(client.public_key(), &hmac));

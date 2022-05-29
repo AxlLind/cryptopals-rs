@@ -8,13 +8,13 @@ const G: Lazy<BigUint> = Lazy::new(|| 2.to_biguint().unwrap());
 const P: Lazy<BigUint> = Lazy::new(|| BigUint::parse_bytes(NIST_MODULI, 16).unwrap());
 const PASSWORD: &[u8] = b"Some super strong password!!#";
 
-struct Server {
+struct SrpServer {
   v: BigUint,
   b: BigUint,
   B: BigUint,
 }
 
-impl Server {
+impl SrpServer {
   fn new() -> Self {
     let mut salt = [0; 32];
     openssl::rand::rand_bytes(&mut salt).unwrap();
@@ -45,7 +45,7 @@ impl Server {
 }
 
 fn main() {
-  let server = Server::new();
+  let server = SrpServer::new();
 
   // S = (A * v**u) ** b % N
   // A == 0 => S = (0 * v**u) ** b % N = 0
