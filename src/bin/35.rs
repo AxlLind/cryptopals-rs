@@ -101,7 +101,7 @@ fn main() {
       (1,1)     | 1^x = 1 => s == 1
       (1,p-1)   | 1^x = 1 => s == 1
       (p-1,1)   | 1^x = 1 => s == 1
-      (p-1,p-1) | p odd => (p-1)^(p-1) = (-1)^even = -1 mod p
+      (p-1,p-1) | (p-1)^(p-1) = -1^-1 = -1 mod p
      */
     if alice.public_key() == g && bob.public_key() == g {
       g.clone()
