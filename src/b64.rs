@@ -59,7 +59,7 @@ mod tests {
 
   #[test]
   fn test_encode() {
-    // source: https://stackoverflow.com/questions/12069598/is-there-a-dataset-available-to-fully-test-a-base64-encode-decoder
+    // source: https://datatracker.ietf.org/doc/html/rfc4648#section-10
     assert_eq!(encode(b""), "");
     assert_eq!(encode(b"f"), "Zg==");
     assert_eq!(encode(b"fo"), "Zm8=");
@@ -71,6 +71,7 @@ mod tests {
 
   #[test]
   fn test_decode() {
+    // source: https://datatracker.ietf.org/doc/html/rfc4648#section-10
     assert_eq!(decode(""), b"");
     assert_eq!(decode("Zg=="), b"f");
     assert_eq!(decode("Zm8="), b"fo");
