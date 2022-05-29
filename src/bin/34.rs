@@ -37,7 +37,7 @@ impl Client {
     (ciphertext, iv)
   }
 
-  fn decrypt_message(&self, message: &[u8], iv: &[u8]) -> Vec<u8> {
+  fn decrypt_message(&self, (message, iv): &(Vec<u8>, [u8; 16])) -> Vec<u8> {
     let key = sha1::sha1(&self.s.as_ref().unwrap().to_bytes_be());
     decrypt(Cipher::aes_128_cbc(), &key[..16], Some(iv), message).unwrap()
   }
@@ -47,19 +47,22 @@ impl Client {
   }
 }
 
+fn share_secrets(alice: &Client, bob: &Client) {
+  let alice_msg = alice.encrypt_secret();
+  let bob_guess = bob.decrypt_message(&alice_msg);
+  assert!(alice.guess_secret(&bob_guess));
+
+  let bob_msg = bob.encrypt_secret();
+  let alice_guess = alice.decrypt_message(&bob_msg);
+  assert!(bob.guess_secret(&alice_guess));
+}
+
 fn intended_protocol() {
   let mut alice = Client::new(b"alice");
   let mut bob = Client::new(b"bob");
   alice.handshake(&bob.public_key());
   bob.handshake(&alice.public_key());
-
-  let alice_msg = alice.encrypt_secret();
-  let bob_guess = bob.decrypt_message(&alice_msg.0, &alice_msg.1);
-  assert!(alice.guess_secret(&bob_guess));
-
-  let bob_msg = bob.encrypt_secret();
-  let alice_guess = alice.decrypt_message(&bob_msg.0, &bob_msg.1);
-  assert!(bob.guess_secret(&alice_guess));
+  share_secrets(&alice, &bob);
 }
 
 fn main() {
@@ -67,24 +70,23 @@ fn main() {
 
   let mut alice = Client::new(b"alice");
   let mut bob = Client::new(b"bob");
+
+  // key fixation attack, p^x mod p = 0 for all x
   alice.handshake(&P);
   bob.handshake(&P);
-
   assert_eq!(alice.s, 0.to_biguint());
   assert_eq!(bob.s, 0.to_biguint());
 
+  // targets can still communicate without issue
+  share_secrets(&alice, &bob);
+
+  // however, we can decrypt their messages
+  let key = sha1::sha1(&[0]);
   let alice_msg = alice.encrypt_secret();
-  let bob_guess = bob.decrypt_message(&alice_msg.0, &alice_msg.1);
-  assert!(alice.guess_secret(&bob_guess));
+  let alice_secret = decrypt(Cipher::aes_128_cbc(), &key[..16], Some(&alice_msg.1), &alice_msg.0).unwrap();
+  assert!(alice.guess_secret(&alice_secret));
 
   let bob_msg = bob.encrypt_secret();
-  let alice_guess = alice.decrypt_message(&bob_msg.0, &bob_msg.1);
-  assert!(bob.guess_secret(&alice_guess));
-
-  let key = sha1::sha1(&[0]);
-  let alice_secret = decrypt(Cipher::aes_128_cbc(), &key[..16], Some(&alice_msg.1), &alice_msg.0).unwrap();
   let bob_secret = decrypt(Cipher::aes_128_cbc(), &key[..16], Some(&bob_msg.1), &bob_msg.0).unwrap();
-
-  assert!(alice.guess_secret(&alice_secret));
   assert!(bob.guess_secret(&bob_secret));
 }
