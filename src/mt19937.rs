@@ -58,22 +58,13 @@ mod tests {
 
   #[test]
   fn test_zero_seed() {
-    // generated with c++ std::mt19937
-    const EXPECTED: [u32; 10] = [
-      2357136044,
-      2546248239,
-      3071714933,
-      3626093760,
-      2588848963,
-      3684848379,
-      2340255427,
-      3638918503,
-      1819583497,
-      2678185683,
-    ];
+    // 100_000 outputs generated with c++ std::mt19937
+    const EXPECTED: &str = include_str!("../inputs/mt19937_testdata.in");
+    assert_eq!(EXPECTED.lines().count(), 100_000);
+
     let mut mt19937 = MT19937::from_seed(0);
-    for x in EXPECTED {
-      assert_eq!(mt19937.gen(), x);
+    for line in EXPECTED.lines() {
+      assert_eq!(mt19937.gen(), line.parse().unwrap());
     }
   }
 }
