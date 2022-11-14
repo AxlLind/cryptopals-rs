@@ -2,14 +2,12 @@ use cryptopals_rs::miller_rabin;
 use num::{BigUint, One, Integer};
 use num_bigint::ToBigUint;
 
-// find p,q such that e and phi(pq) are coprime
-fn generate_pq(e: &BigUint) -> (BigUint, BigUint) {
+fn gen_rsa_prime(e: &BigUint) -> BigUint {
   let one = BigUint::one();
   loop {
-    let p = miller_rabin::rand_prime(512);
-    let q = miller_rabin::rand_prime(512);
-    if ((&p - &one) * (&q - &one)).gcd(e).is_one() {
-      return (p, q)
+    let p = miller_rabin::rand_prime(1024);
+    if (&p - &one).gcd(e).is_one() {
+      return p
     }
   }
 }
@@ -26,7 +24,8 @@ fn decrypt(d: &BigUint, n: &BigUint, ciphertext: &[u8]) -> Vec<u8> {
 
 fn main() {
   let e = 3.to_biguint().unwrap();
-  let (p, q) = generate_pq(&e);
+  let p = gen_rsa_prime(&e);
+  let q = gen_rsa_prime(&e);
   let n = &p * &q;
   let one = BigUint::one();
   let d = cryptopals_rs::modinv(&e, &((&p - &one) * (&q - &one)));
