@@ -37,7 +37,7 @@ pub fn miller_rabin(n: &BigUint) -> bool {
   true
 }
 
-pub fn rand_big_prime(bits: u64) -> BigUint {
+pub fn rand_prime(bits: u64) -> BigUint {
   let mut rng = rand::thread_rng();
   let one = BigUint::one();
   loop {

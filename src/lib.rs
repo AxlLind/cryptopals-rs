@@ -1,5 +1,7 @@
 use std::iter;
 use itertools::Itertools;
+use num::Integer;
+use num::{BigUint, Zero, One, BigInt, Signed};
 use openssl::symm::{Cipher, Mode, Crypter};
 
 pub mod mt19937;
@@ -128,4 +130,21 @@ pub fn rand_range(min: u64, max: u64) -> u64 {
     r = u64::from_be_bytes(bytes) % range.next_power_of_two();
   }
   r + min
+}
+
+pub fn modinv(n: &BigUint, p: &BigUint) -> BigUint {
+  let n = BigInt::from_biguint(num_bigint::Sign::Plus, n.clone());
+  let p = BigInt::from_biguint(num_bigint::Sign::Plus, p.clone());
+  if p.is_one() { return BigUint::one() }
+
+  let (mut a, mut m, mut x, mut inv) = (n.clone(), p.clone(), BigInt::zero(), BigInt::one());
+  while a > BigInt::one() {
+    let (div, rem) = a.div_rem(&m);
+    inv -= div * &x;
+    a = rem;
+    std::mem::swap(&mut a, &mut m);
+    std::mem::swap(&mut x, &mut inv);
+  }
+
+  (if inv.is_negative() {inv + p} else {inv}).to_biguint().unwrap()
 }
