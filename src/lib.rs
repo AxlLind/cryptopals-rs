@@ -148,3 +148,16 @@ pub fn modinv(n: &BigUint, p: &BigUint) -> BigUint {
 
   (if inv.is_negative() {inv + p} else {inv}).to_biguint().unwrap()
 }
+
+pub fn crt(residues: &[BigUint], modulii: &[BigUint]) -> Option<BigUint> {
+  let prod = modulii.iter().product::<BigUint>();
+
+  let mut sum = BigUint::zero();
+
+  for (residue, modulus) in residues.iter().zip(modulii) {
+    let p = &prod / modulus;
+    sum += residue * modinv(&p, &modulus) * p
+  }
+
+  Some(sum % prod)
+}
