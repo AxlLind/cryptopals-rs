@@ -17,6 +17,14 @@ This repo is a work in progress. Challenges solved so far:
 - [x] [Set 3](https://cryptopals.com/sets/3) (17-24)
 - [x] [Set 4](https://cryptopals.com/sets/4) (25-32)
 - [x] [Set 5](https://cryptopals.com/sets/5) (33-40)
-- [ ] [Set 6](https://cryptopals.com/sets/6)
-- [ ] [Set 7](https://cryptopals.com/sets/7)
-- [ ] [Set 8](https://cryptopals.com/sets/8)
+- [ ] [Set 6](https://cryptopals.com/sets/6) (41-48)
+  - [x] Challenge 41
+  - [ ] Challenge 42
+  - [ ] Challenge 43
+  - [ ] Challenge 44
+  - [ ] Challenge 45
+  - [ ] Challenge 46
+  - [ ] Challenge 47
+  - [ ] Challenge 48
+- [ ] [Set 7](https://cryptopals.com/sets/7) (49-56)
+- [ ] [Set 8](https://cryptopals.com/sets/8) (57-66)
