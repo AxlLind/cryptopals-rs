@@ -32,31 +32,31 @@ impl Server {
     Self { n, d, seen_messages: HashSet::default() }
   }
 
-  fn public_key(&self) -> &BigUint { &self.n }
+  fn public_mod(&self) -> &BigUint { &self.n }
 
   fn decrypt(&mut self, ciphertext: &Vec<u8>) -> Option<Vec<u8>> {
     if !self.seen_messages.insert(ciphertext.clone()) {
       return None;
     }
     let c = BigUint::from_bytes_be(ciphertext);
-    let m = c.modpow(&self.d, &self.n).to_bytes_be();
-    Some(m)
+    Some(c.modpow(&self.d, &self.n).to_bytes_be())
   }
 }
 
 fn main() {
   let e = 3.to_biguint().unwrap();
   let mut server = Server::new(&e);
-  let ciphertext = BigUint::from_bytes_be(SECRET_MESSAGE).modpow(&e, server.public_key()).to_bytes_be();
+  let n = server.public_mod().clone();
+  let ciphertext = BigUint::from_bytes_be(SECRET_MESSAGE).modpow(&e, &n).to_bytes_be();
 
   assert_eq!(server.decrypt(&ciphertext).unwrap(), SECRET_MESSAGE);
   assert!(server.decrypt(&ciphertext).is_none());
 
-  let s = rand::thread_rng().gen_biguint_below(server.public_key());
-  let hacked_ciphertext = (s.modpow(&e, server.public_key()) * BigUint::from_bytes_be(&ciphertext)) % server.public_key();
+  let s = rand::thread_rng().gen_biguint_below(&n);
+  let hacked_ciphertext = (s.modpow(&e, &n) * BigUint::from_bytes_be(&ciphertext)) % &n;
   let plaintext = server.decrypt(&hacked_ciphertext.to_bytes_be()).unwrap();
 
-  let s_inv = cryptopals_rs::modinv(&s, server.public_key());
-  let message = (BigUint::from_bytes_be(&plaintext) * s_inv) % server.public_key();
+  let s_inv = cryptopals_rs::modinv(&s, &n);
+  let message = (BigUint::from_bytes_be(&plaintext) * s_inv) % &n;
   assert_eq!(message.to_bytes_be(), SECRET_MESSAGE);
 }
