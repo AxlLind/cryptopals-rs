@@ -28,7 +28,7 @@ impl Server {
     let q = gen_rsa_prime(e);
     let n = &p * &q;
     let one = BigUint::one();
-    let d = cryptopals_rs::modinv(e, &((&p - &one) * (&q - &one)));
+    let d = cryptopals_rs::modinv(e, &((&p - &one) * (&q - &one))).unwrap();
     Self { n, d, seen_messages: HashSet::default() }
   }
 
@@ -56,7 +56,7 @@ fn main() {
   let hacked_ciphertext = (s.modpow(&e, &n) * BigUint::from_bytes_be(&ciphertext)) % &n;
   let plaintext = server.decrypt(&hacked_ciphertext.to_bytes_be()).unwrap();
 
-  let s_inv = cryptopals_rs::modinv(&s, &n);
+  let s_inv = cryptopals_rs::modinv(&s, &n).unwrap();
   let message = (BigUint::from_bytes_be(&plaintext) * s_inv) % &n;
   assert_eq!(message.to_bytes_be(), SECRET_MESSAGE);
 }

@@ -28,7 +28,7 @@ fn main() {
   let q = gen_rsa_prime(&e);
   let n = &p * &q;
   let one = BigUint::one();
-  let d = cryptopals_rs::modinv(&e, &((&p - &one) * (&q - &one)));
+  let d = cryptopals_rs::modinv(&e, &((&p - &one) * (&q - &one))).unwrap();
 
   let tests = ["42", "The quick brown fox jumps over the lazy dog"];
   for t in tests {

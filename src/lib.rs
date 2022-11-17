@@ -132,32 +132,29 @@ pub fn rand_range(min: u64, max: u64) -> u64 {
   r + min
 }
 
-pub fn modinv(n: &BigUint, p: &BigUint) -> BigUint {
+pub fn modinv(n: &BigUint, p: &BigUint) -> Option<BigUint> {
   let n = BigInt::from_biguint(num_bigint::Sign::Plus, n.clone());
   let p = BigInt::from_biguint(num_bigint::Sign::Plus, p.clone());
-  if p.is_one() { return BigUint::one() }
-
   let (mut a, mut m, mut x, mut inv) = (n.clone(), p.clone(), BigInt::zero(), BigInt::one());
   while a > BigInt::one() {
+    if m.is_zero() {
+      return None;
+    }
     let (div, rem) = a.div_rem(&m);
     inv -= div * &x;
     a = rem;
     std::mem::swap(&mut a, &mut m);
     std::mem::swap(&mut x, &mut inv);
   }
-
-  (if inv.is_negative() {inv + p} else {inv}).to_biguint().unwrap()
+  Some((if inv.is_negative() {inv + p} else {inv}).to_biguint().unwrap())
 }
 
 pub fn crt(residues: &[BigUint], modulii: &[BigUint]) -> Option<BigUint> {
   let prod = modulii.iter().product::<BigUint>();
-
   let mut sum = BigUint::zero();
-
   for (residue, modulus) in residues.iter().zip(modulii) {
     let p = &prod / modulus;
-    sum += residue * modinv(&p, &modulus) * p
+    sum += residue * modinv(&p, &modulus)? * p
   }
-
   Some(sum % prod)
 }
