@@ -23,7 +23,7 @@ This repo is a work in progress. Challenges solved so far:
   - [x] Challenge 43
   - [x] Challenge 44
   - [x] Challenge 45
-  - [ ] Challenge 46
+  - [x] Challenge 46
   - [ ] Challenge 47
   - [ ] Challenge 48
 - [ ] [Set 7](https://cryptopals.com/sets/7) (49-56)
