@@ -1,22 +1,10 @@
 use std::iter;
-
-use cryptopals_rs::miller_rabin;
-use num::{BigUint, One, Integer};
+use num::{BigUint, One};
 use num_bigint::ToBigUint;
-use cryptopals_rs::sha1::sha1;
+use cryptopals_rs::bn;
 
 const ASN1_SHA: [u8; 15] = [0x30, 0x21, 0x30, 0x9, 0x6, 0x5, 0x2b, 0xe, 0x3, 0x2, 0x1a, 0x5, 0x0, 0x4, 0x14];
 const SECRET_MESSAGE: &[u8] = b"hi mom";
-
-fn gen_rsa_prime(e: &BigUint) -> BigUint {
-  let one = BigUint::one();
-  loop {
-    let p = miller_rabin::rand_prime(1024);
-    if (&p - &one).gcd(e).is_one() {
-      return p
-    }
-  }
-}
 
 fn produce_signature(d: &BigUint, n: &BigUint, message: &[u8]) -> BigUint {
   // Pad according to: https://datatracker.ietf.org/doc/html/rfc3447#section-9.2
@@ -24,7 +12,7 @@ fn produce_signature(d: &BigUint, n: &BigUint, message: &[u8]) -> BigUint {
     .chain(iter::repeat(&0xff).take(message.len() - 3))
     .chain([0].iter())
     .chain(&ASN1_SHA)
-    .chain(sha1(message).iter())
+    .chain(cryptopals_rs::sha1::sha1(message).iter())
     .copied()
     .collect::<Vec<_>>();
   BigUint::from_bytes_be(&padded_msg).modpow(d, n)
@@ -47,18 +35,18 @@ fn verify_signature(n: &BigUint, message: &[u8], signature: &BigUint) -> bool {
 
 fn main() {
   let e = 3.to_biguint().unwrap();
-  let p = gen_rsa_prime(&e);
-  let q = gen_rsa_prime(&e);
+  let p = bn::gen_rsa_prime(&e, 1024);
+  let q = bn::gen_rsa_prime(&e, 1024);
   let n = &p * &q;
   let one = BigUint::one();
-  let d = cryptopals_rs::modinv(&e, &((&p - &one) * (&q - &one))).unwrap();
+  let d = bn::modinv(&e, &((&p - &one) * (&q - &one))).unwrap();
 
   let signature = produce_signature(&d, &n, SECRET_MESSAGE);
   assert!(verify_signature(&n, SECRET_MESSAGE, &signature));
 
   let malicious_padding = [0, 1, 0xff, 0].iter()
     .chain(&ASN1_SHA)
-    .chain(sha1(SECRET_MESSAGE).iter())
+    .chain(cryptopals_rs::sha1::sha1(SECRET_MESSAGE).iter())
     .chain(iter::repeat(&0))
     .take(128)
     .copied()

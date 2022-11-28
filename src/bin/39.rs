@@ -1,16 +1,6 @@
-use cryptopals_rs::miller_rabin;
-use num::{BigUint, One, Integer};
+use cryptopals_rs::bn;
+use num::{BigUint, One};
 use num_bigint::ToBigUint;
-
-fn gen_rsa_prime(e: &BigUint) -> BigUint {
-  let one = BigUint::one();
-  loop {
-    let p = miller_rabin::rand_prime(1024);
-    if (&p - &one).gcd(e).is_one() {
-      return p
-    }
-  }
-}
 
 fn encrypt(e: &BigUint, n: &BigUint, msg: &[u8]) -> Vec<u8> {
   let m = BigUint::from_bytes_be(msg);
@@ -24,11 +14,11 @@ fn decrypt(d: &BigUint, n: &BigUint, ciphertext: &[u8]) -> Vec<u8> {
 
 fn main() {
   let e = 3.to_biguint().unwrap();
-  let p = gen_rsa_prime(&e);
-  let q = gen_rsa_prime(&e);
+  let p = bn::gen_rsa_prime(&e, 1024);
+  let q = bn::gen_rsa_prime(&e, 1024);
   let n = &p * &q;
   let one = BigUint::one();
-  let d = cryptopals_rs::modinv(&e, &((&p - &one) * (&q - &one))).unwrap();
+  let d = bn::modinv(&e, &((&p - &one) * (&q - &one))).unwrap();
 
   let tests = ["42", "The quick brown fox jumps over the lazy dog"];
   for t in tests {

@@ -1,5 +1,6 @@
 use num::{BigUint, Zero, Num, One};
 use num_bigint::{RandBigInt};
+use cryptopals_rs::bn;
 
 fn int_hash(message: &[u8]) -> BigUint { BigUint::from_bytes_be(&cryptopals_rs::sha1::sha1(message)) }
 
@@ -13,7 +14,7 @@ fn dsa_sign(p: &BigUint, q: &BigUint, g: &BigUint, x: &BigUint, message: &[u8]) 
     // if r.is_zero() {
     //   continue;
     // }
-    let s = (cryptopals_rs::modinv(&k, q).unwrap() * (&h + x * &r)) % q;
+    let s = (bn::modinv(&k, q).unwrap() * (&h + x * &r)) % q;
     if !s.is_zero() {
       return (r, s, k);
     }
@@ -25,7 +26,7 @@ fn dsa_verify(p: &BigUint, q: &BigUint, g: &BigUint, y: &BigUint, message: &[u8]
     return false;
   }
   let h = int_hash(message);
-  let w = cryptopals_rs::modinv(s, q).unwrap();
+  let w = bn::modinv(s, q).unwrap();
   let u1 = (&h * &w) % q;
   let u2 = (r * &w) % q;
   let v = ((g.modpow(&u1, p) * y.modpow(&u2, p)) % p) % q;
@@ -47,7 +48,7 @@ fn main() {
 
   let z = rng.gen_biguint_below(&q);
   let r = y.modpow(&z, &p) % &q;
-  let s = (&r * cryptopals_rs::modinv(&z, &q).unwrap()) % &q;
+  let s = (&r * bn::modinv(&z, &q).unwrap()) % &q;
   assert!(dsa_verify(&p, &q, &g, &y, b"Hello, world", &r, &s));
   assert!(dsa_verify(&p, &q, &g, &y, b"Goodbye, world", &r, &s));
 }

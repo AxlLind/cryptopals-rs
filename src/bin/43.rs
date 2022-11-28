@@ -1,5 +1,6 @@
 use num::{BigUint, Zero, Num};
 use num_bigint::{RandBigInt, ToBigUint};
+use cryptopals_rs::bn;
 
 const MESSAGE: &[u8] = b"For those that envy a MC it can be hazardous to your health\nSo be friendly, a matter of life and death, just like a etch-a-sketch\n";
 
@@ -14,7 +15,7 @@ fn dsa_sign(p: &BigUint, q: &BigUint, g: &BigUint, x: &BigUint, message: &[u8]) 
     if r.is_zero() {
       continue;
     }
-    let s = (cryptopals_rs::modinv(&k, q).unwrap() * (&h + x * &r)) % q;
+    let s = (bn::modinv(&k, q).unwrap() * (&h + x * &r)) % q;
     if !s.is_zero() {
       return (r, s, k);
     }
@@ -26,7 +27,7 @@ fn dsa_verify(p: &BigUint, q: &BigUint, g: &BigUint, y: &BigUint, message: &[u8]
     return false;
   }
   let h = int_hash(message);
-  let w = cryptopals_rs::modinv(s, q).unwrap();
+  let w = bn::modinv(s, q).unwrap();
   let u1 = (&h * &w) % q;
   let u2 = (r * &w) % q;
   let v = ((g.modpow(&u1, p) * y.modpow(&u2, p)) % p) % q;
@@ -35,7 +36,7 @@ fn dsa_verify(p: &BigUint, q: &BigUint, g: &BigUint, y: &BigUint, message: &[u8]
 
 fn extract_secret_key(q: &BigUint, r: &BigUint, s: &BigUint, k: &BigUint, message: &[u8]) -> BigUint {
   let h = int_hash(message);
-  (((q + s * k) - h) * cryptopals_rs::modinv(r, q).unwrap()) % q
+  (((q + s * k) - h) * bn::modinv(r, q).unwrap()) % q
 }
 
 fn verify_protocol(p: &BigUint, q: &BigUint, g: &BigUint) {

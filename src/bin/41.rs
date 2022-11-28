@@ -1,20 +1,10 @@
 use std::collections::HashSet;
 
-use cryptopals_rs::miller_rabin;
-use num::{BigUint, One, Integer};
+use num::{BigUint, One};
 use num_bigint::{ToBigUint, RandBigInt};
+use cryptopals_rs::bn;
 
 const SECRET_MESSAGE: &[u8] = b"super secret message";
-
-fn gen_rsa_prime(e: &BigUint) -> BigUint {
-  let one = BigUint::one();
-  loop {
-    let p = miller_rabin::rand_prime(512);
-    if (&p - &one).gcd(e).is_one() {
-      return p
-    }
-  }
-}
 
 struct Server {
   n: BigUint,
@@ -24,11 +14,11 @@ struct Server {
 
 impl Server {
   fn new(e: &BigUint) -> Self {
-    let p = gen_rsa_prime(e);
-    let q = gen_rsa_prime(e);
+    let p = bn::gen_rsa_prime(e, 512);
+    let q = bn::gen_rsa_prime(e, 512);
     let n = &p * &q;
     let one = BigUint::one();
-    let d = cryptopals_rs::modinv(e, &((&p - &one) * (&q - &one))).unwrap();
+    let d = bn::modinv(e, &((&p - &one) * (&q - &one))).unwrap();
     Self { n, d, seen_messages: HashSet::default() }
   }
 
@@ -56,7 +46,7 @@ fn main() {
   let hacked_ciphertext = (s.modpow(&e, &n) * BigUint::from_bytes_be(&ciphertext)) % &n;
   let plaintext = server.decrypt(&hacked_ciphertext.to_bytes_be()).unwrap();
 
-  let s_inv = cryptopals_rs::modinv(&s, &n).unwrap();
+  let s_inv = bn::modinv(&s, &n).unwrap();
   let message = (BigUint::from_bytes_be(&plaintext) * s_inv) % &n;
   assert_eq!(message.to_bytes_be(), SECRET_MESSAGE);
 }

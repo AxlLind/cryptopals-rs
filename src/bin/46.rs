@@ -1,18 +1,8 @@
 use num::{BigUint, One, Integer, Zero};
 use num_bigint::ToBigUint;
-use cryptopals_rs::{miller_rabin, b64};
+use cryptopals_rs::{bn, b64};
 
 const SECRET: &str = "VGhhdCdzIHdoeSBJIGZvdW5kIHlvdSBkb24ndCBwbGF5IGFyb3VuZCB3aXRoIHRoZSBGdW5reSBDb2xkIE1lZGluYQ==";
-
-fn gen_rsa_prime(e: &BigUint) -> BigUint {
-  let one = BigUint::one();
-  loop {
-    let p = miller_rabin::rand_prime(1024);
-    if (&p - &one).gcd(e).is_one() {
-      return p
-    }
-  }
-}
 
 struct Oracle {
   n: BigUint,
@@ -21,11 +11,11 @@ struct Oracle {
 
 impl Oracle {
   fn new(e: &BigUint) -> Self {
-    let p = gen_rsa_prime(e);
-    let q = gen_rsa_prime(e);
+    let p = bn::gen_rsa_prime(e, 1024);
+    let q = bn::gen_rsa_prime(e, 1024);
     let n = &p * &q;
     let one = BigUint::one();
-    let d = cryptopals_rs::modinv(e, &((&p - &one) * (&q - &one))).unwrap();
+    let d = bn::modinv(e, &((&p - &one) * (&q - &one))).unwrap();
     Self { n, d }
   }
 

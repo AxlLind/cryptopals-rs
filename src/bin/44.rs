@@ -1,5 +1,6 @@
 use num::{BigUint, Num};
 use itertools::Itertools;
+use cryptopals_rs::bn;
 
 const INPUT: &str = include_str!("../../inputs/44.in");
 
@@ -7,7 +8,7 @@ fn int_hash(message: &[u8]) -> BigUint { BigUint::from_bytes_be(&cryptopals_rs::
 
 fn extract_secret_key(q: &BigUint, r: &BigUint, s: &BigUint, k: &BigUint, message: &[u8]) -> BigUint {
   let h = int_hash(message);
-  (((q + s * k) - h) * cryptopals_rs::modinv(r, q).unwrap()) % q
+  (((q + s * k) - h) * bn::modinv(r, q).unwrap()) % q
 }
 
 fn main() {
@@ -29,7 +30,7 @@ fn main() {
   let x = messages.iter()
     .tuple_combinations()
     .map(|((msg1, s1, r1, m1), (_, s2, _, m2))| {
-      let k = ((&q + m1 - m2) * cryptopals_rs::modinv(&(&q + s1 - s2), &q).unwrap()) % &q;
+      let k = ((&q + m1 - m2) * bn::modinv(&(&q + s1 - s2), &q).unwrap()) % &q;
       extract_secret_key(&q, r1, s1, &k, msg1.as_bytes())
     })
     .find(|x| g.modpow(x, &p) == y)
