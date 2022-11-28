@@ -1,4 +1,4 @@
-use num::{BigUint, Zero, Num};
+use num::{BigUint, Zero, Num, One};
 use num_bigint::{RandBigInt};
 
 fn int_hash(message: &[u8]) -> BigUint { BigUint::from_bytes_be(&cryptopals_rs::sha1::sha1(message)) }
@@ -42,7 +42,7 @@ fn main() {
   assert_eq!(dsa_sign(&p, &q, &BigUint::zero(), &x, b"Hello, world").0, BigUint::zero());
   assert_eq!(dsa_sign(&p, &q, &BigUint::zero(), &x, b"Goodbye, world").0, BigUint::zero());
 
-  let g = &p + BigUint::zero();
+  let g = &p + BigUint::one();
   let y = g.modpow(&x, &p);
 
   let z = rng.gen_biguint_below(&q);
